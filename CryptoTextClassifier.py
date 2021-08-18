@@ -26,10 +26,10 @@ class CryptoTextClassifier:
         try:
             preprocessed_text = self.__preprocess_text(text)
             vectors = self.__vectorizer.transform([preprocessed_text])
-            probas = self.__model.predict_proba(vectors)
+            probas = self.__model.predict_proba(vectors)[0]
             res_dict = dict()
             for i, proba in enumerate(probas):
-                res_dict[self.__classification_labels[i]] = round(proba[0][1] * 100, 2)
+                res_dict[self.__classification_labels[i]] = round(proba * 100, 2)
         except:
             res_dict = {}
         return res_dict
