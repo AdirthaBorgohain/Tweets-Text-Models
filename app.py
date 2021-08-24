@@ -1,15 +1,21 @@
+"""
+An API script written using Flask. Contains three endpoints:
+    - /check_liveliness: checks whether the API is live and working
+    - /analyze_sentiment: predicts the sentiment of a text
+    - /classify_text: classifies a text to its corresponding class
+"""
 import json
 from signal import signal, SIGPIPE, SIG_DFL
 from flask import Flask, request, make_response
 
+from TextClassifier import TextClassifier
 from SentimentAnalyzer import SentimentAnalyzer
-from CryptoTextClassifier import CryptoTextClassifier
 
 signal(SIGPIPE, SIG_DFL)  # don't throw exception on broken pipe
 app = Flask(__name__)
 
 sentiment_analyzer = SentimentAnalyzer()
-crypto_text_classifier = CryptoTextClassifier()
+defi_text_classifier = TextClassifier(model='defi')
 
 
 # checks whether the API is live and working
@@ -18,7 +24,7 @@ def check_liveliness():
     dummy_text = "New airdrop live Cherry swap is a best project there community is very active."
     try:
         sentiment = sentiment_analyzer.analyze(dummy_text)
-        classification = crypto_text_classifier.classify(dummy_text)
+        classification = defi_text_classifier.classify(dummy_text)
         if sentiment and classification:
             return {"status": "ok"}, 200
         raise Exception("Internal Error")
@@ -38,7 +44,7 @@ def analyze_sentiment():
             response.status_code = 200
             return response
     except Exception as e:
-        print("Error occured: ", e)
+        print("Error occurred: ", e)
         return {}, 400
 
 
@@ -48,7 +54,7 @@ def classify_text():
     try:
         if request.headers['Content-Type'] == 'application/json':
             text = request.json.get('text')
-            clf = crypto_text_classifier.classify(text)
+            clf = defi_text_classifier.classify(text)
             response = make_response(json.dumps(clf))
             response.headers['Content-Type'] = 'application/json'
             response.status_code = 200
